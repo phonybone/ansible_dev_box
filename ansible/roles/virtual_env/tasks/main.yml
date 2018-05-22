@@ -1,0 +1,36 @@
+---
+# this is useless; only would apply to current login command, nothing else
+# have to specify correct python or pip for each command
+# - name: activate virtual venv
+#   shell: . /usr/local/venvs/{{ venv_name }}/bin/activate
+#   become_user: vagrant
+
+# - debug:
+#     msg: "HOME is {{ ansible_env.HOME }}"
+
+- name: install various packages
+  pip:
+    executable: "/usr/local/venvs/{{ venv_name }}/bin/pip"
+    name: "{{ item }}"
+    extra_args: -U
+  with_items:
+    - pip
+    - pbr
+    - wheel
+    - ipython
+  become_user: vagrant
+
+# see https://coderwall.com/p/p3bj2a/cloning-from-github-in-vagrant-using-ssh-agent-forwarding
+- name: fetch phonybone_utils
+  git:
+    repo: git@github.com:phonybone/phonybone_utils.git
+    dest: /home/vagrant/phonybone_utils
+    accept_hostkey: true
+  become_user: vagrant
+  
+- name: install phonybone_utils in "develop" mode
+  command: "/usr/local/venvs/{{ venv_name }}/bin/python2.7 setup.py develop"
+  args:
+    chdir: /home/vagrant/phonybone_utils
+  become_user: vagrant
+    

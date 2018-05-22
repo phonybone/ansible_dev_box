@@ -1,0 +1,77 @@
+---
+- name: python2 deps
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - openssl-devel
+    - bzip2-devel
+    - wget
+    - ncurses-devel
+
+- name: mkdir "/usr/local/src/Python-{{ python_version }}"
+  file:
+    path: /usr/local/src
+    state: directory
+    
+- name: get python2
+  get_url:
+    dest: /usr/local/src/
+    url: "https://www.python.org/ftp/python/{{ python_version }}/Python-{{ python_version }}.tgz"
+    
+- name: unarchive python2
+  unarchive:
+    copy: no
+    dest: "/usr/local/src"
+    src: "/usr/local/src/Python-{{ python_version }}.tgz"
+
+
+- name: configure python
+  command: /usr/local/src/Python-{{ python_version }}/configure 
+  args:
+    chdir: "/usr/local/src/Python-{{ python_version }}"
+    creates: "/usr/local/src/Python-{{ python_version }}/Makefile"
+    
+- name: make python
+  command: make
+  args: 
+    chdir: "/usr/local/src/Python-{{ python_version }}"
+    creates: "/usr/local/src/Python-{{ python_version }}/build"
+    
+- name: altinstall python
+  command: make altinstall
+  args: 
+    chdir: "/usr/local/src/Python-{{ python_version }}"
+    creates: /usr/local/bin/python2.7
+
+- name: get pip
+  get_url:
+    dest: /usr/local/bin
+    url: https://bootstrap.pypa.io/get-pip.py 
+
+- name: install pip
+  command: /usr/local/bin/python2.7 get-pip.py
+  args: 
+    chdir: /usr/local/bin
+    creates: /usr/local/bin/pip
+
+- name: install virtualenv
+  pip:
+    executable: /usr/local/bin/pip
+    name: virtualenv
+
+- name: create virtual venvs folder
+  file:
+    path: /usr/local/venvs
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: 0775
+
+- name: create default virtualenv
+  command: /usr/local/bin/virtualenv -p /usr/local/bin/python2.7 dev
+  args:
+    chdir: /usr/local/venvs
+    creates: /usr/local/venvs/dev/bin
+  become_user: vagrant

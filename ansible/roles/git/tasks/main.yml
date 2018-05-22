@@ -1,0 +1,41 @@
+---
+- name: yum install git
+  yum:
+    name: git
+    state: present
+
+- name: git config name
+  git_config:
+    name: user.name
+    value: Victor Cassen
+    scope: global
+    
+- name: git config email
+  git_config:
+    name: user.email
+    value: vmc.swdev@gmail.com
+    scope: global
+
+- name: create ~/.ssh
+  file:
+    path: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: 0700
+
+# see https://github.com/jcalazan/ansible-django-stack/issues/11
+# - name: github id_rsa
+#   copy:
+#     src: files/id_rsa.github
+#     dest: "/home/vagrant/.ssh/id_rsa.github_deploy"
+#     mode: 0600
+#   become_user: vagrant
+  
+# - name: github id_rsa.pub
+#   copy:
+#     src: files/id_rsa.github.pub
+#     dest: "/home/vagrant/.ssh/id_rsa.github_deploy.pub"
+#     mode: 0644
+#   become_user: vagrant
+# see instead https://coderwall.com/p/p3bj2a/cloning-from-github-in-vagrant-using-ssh-agent-forwarding

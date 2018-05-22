@@ -1,0 +1,9 @@
+---
+- name: yum install epel-release
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - epel-release
+    - emacs
+    - xorg-x11-xauth

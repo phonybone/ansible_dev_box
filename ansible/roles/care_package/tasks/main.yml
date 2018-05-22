@@ -1,0 +1,31 @@
+---    
+- name: create CarePackage dir
+  file:
+    path: /home/vagrant/CarePackage
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: 0755
+
+- name: download CarePackage from github
+  git:
+    repo: https://github.com/phonybone/CarePackage
+    dest: /home/vagrant/CarePackage
+  become_user: vagrant
+
+- name: install CarePackage files
+  command: "cp /home/vagrant/CarePackage/{{ item }} /home/vagrant"
+  with_items:
+    - .bashrc
+    - .bash.aliases
+    - .bash.functions
+    - .emacs
+  become_user: vagrant
+
+- name: create .bashrc.local from template
+  template:
+    src: bashrc_local.j2
+    dest: /home/vagrant/.bashrc.local
+    owner: vagrant
+    group: vagrant
+  become_user: vagrant
